@@ -1,0 +1,58 @@
+version: '3.5'
+
+networks:
+  frontend:
+    driver: ${NETWORKS_DRIVER}
+  backend:
+    driver: ${NETWORKS_DRIVER}
+volumes:
+  ansible:
+    driver: ${VOLUME_DRIVER}
+
+services:
+  ansible:
+    tty: true
+    stdin_open: true
+    build:
+      context: ./ansible
+    volumes:
+      - ./ansible/src:/var/www/ansible
+    networks:
+      - backend
+  redis:
+    build: ./redis
+    volumes:
+      - ${DATA_PATH_HOST}/redis:/data
+    command: --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - backend
+  centos:
+    tty: true
+    stdin_open: true
+    build: ./centos
+    volumes:
+      - ./centos:/var/www/files
+    networks:
+      - backend
+    ports:
+      - "2022:22"
+  mysql:
+    build:
+      context: ./mysql
+      args:
+        - MYSQL_VERSION=${MYSQL_VERSION}
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=${WORKSPACE_TIMEZONE}
+    volumes:
+      - ${DATA_PATH_HOST}/mysql:/var/lib/mysql
+      - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+    ports:
+      - "${MYSQL_PORT}:3306"
+    networks:
+      - backend
