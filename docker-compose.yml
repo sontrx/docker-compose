@@ -8,6 +8,7 @@ networks:
 volumes:
   ansible:
     driver: ${VOLUME_DRIVER}
+  mongodata:
 
 services:
   ansible:
@@ -54,5 +55,17 @@ services:
       - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_PORT}:3306"
+    networks:
+      - backend
+  mongo:
+    build: ./mongo
+    ports:
+      - "${MONGODB_PORT}:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    volumes:
+      - mongodata:/data/db
+      - ${DATA_PATH_HOST}/mongo_config:/data/configdb
     networks:
       - backend
