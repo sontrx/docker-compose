@@ -13,6 +13,7 @@ volumes:
 
 services:
   redis:
+    container_name: redis
     build: ./redis
     volumes:
       - ./redis/data:/data
@@ -22,6 +23,7 @@ services:
     networks:
       - backend
   mysql:
+    container_name: mysql
     build:
       context: ./mysql
       args:
@@ -40,6 +42,7 @@ services:
     networks:
       - backend
   postgres:
+    container_name: postgres
     build:
       context: ./postgres
       args:
@@ -56,6 +59,7 @@ services:
     networks:
       - backend
   mongo:
+    container_name: mongodb
     build: ./mongo
     ports:
       - "${MONGODB_PORT}:27017"
@@ -63,7 +67,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
-      - ./mongo/data:/data/db
+      - mongodata:/data/db
       - ./mongo/config:/data/configdb
     networks:
       - backend
