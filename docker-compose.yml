@@ -2,43 +2,24 @@ version: '3.5'
 
 networks:
   frontend:
-    driver: ${NETWORKS_DRIVER}
+    driver: bridge
   backend:
-    driver: ${NETWORKS_DRIVER}
+    driver: bridge
 volumes:
   ansible:
-    driver: ${VOLUME_DRIVER}
+    driver: local
   mongodata:
 
 services:
-  ansible:
-    tty: true
-    stdin_open: true
-    build:
-      context: ./ansible
-    volumes:
-      - ./ansible/src:/var/www/ansible
-    networks:
-      - backend
   redis:
     build: ./redis
     volumes:
-      - ${DATA_PATH_HOST}/redis:/data
+      - ./redis/data:/data
     command: --requirepass ${REDIS_PASSWORD}
     ports:
       - "${REDIS_PORT}:6379"
     networks:
       - backend
-  centos:
-    tty: true
-    stdin_open: true
-    build: ./centos
-    volumes:
-      - ./centos:/var/www/files
-    networks:
-      - backend
-    ports:
-      - "2022:22"
   mysql:
     build:
       context: ./mysql
@@ -49,10 +30,10 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - TZ=${WORKSPACE_TIMEZONE}
+      - TZ=UTC
     volumes:
-      - ${DATA_PATH_HOST}/mysql:/var/lib/mysql
-      - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_PORT}:3306"
     networks:
@@ -67,8 +48,8 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - ${DATA_PATH_HOST}/postgres:/var/lib/postgresql/data
-      - ${POSTGRES_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+      - ./postgres/data:/var/lib/postgresql/data
+      - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - "${POSTGRES_PORT}:5432"
     networks:
@@ -81,7 +62,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     volumes:
-      - mongodata:/data/db
-      - ${DATA_PATH_HOST}/mongo_config:/data/configdb
+      - ./mongo/data:/data/db
+      - ./mongo/config:/data/configdb
     networks:
       - backend
