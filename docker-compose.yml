@@ -6,8 +6,6 @@ networks:
   backend:
     driver: bridge
 volumes:
-  ansible:
-    driver: local
   mongodata:
   pgdata:
 
@@ -82,4 +80,16 @@ services:
     volumes:
       - ./nginx/data:/data
       - ./nginx/letsencrypt:/etc/letsencrypt
-
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:latest
+    privileged: true
+    ports:
+      - 8080:8080
+      - 50000:50000
+    volumes:
+      - ./jenkins/certs:/certs/client
+      - ./jenkins/data:/var/jenkins_home
+      - ./jenkins/docker.sock:/var/run/docker.sock
+    networks:
+      - backend
