@@ -89,7 +89,7 @@ services:
       - 50000:50000
     volumes:
       - ./jenkins/certs:/certs/client
-      - ./jenkins/data:/var/jenkins_home
+      - ./jenkins/jenkins_home:/var/jenkins_home
       - ./jenkins/docker.sock:/var/run/docker.sock
     networks:
       - backend
