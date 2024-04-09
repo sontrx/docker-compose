@@ -1,0 +1,66 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1400.v7fd111b_ec82f">
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@3894.vd0f0248b_a_fc4">
+    <script>def Branch = &quot;dev&quot;
+def Project_User = &quot;dainguyenx3&quot;
+def Project_Repository = &quot;https://git.x3english.com/scm/set/suzu-api.git&quot;
+def Username = &quot;jenkins&quot;
+def IP_Server = [&quot;13.250.62.89&quot;]
+def Web_Folder = &quot;/var/www/html&quot;
+def Project_Folder = &quot;suzu.goga.ai&quot;
+def text_body_email = &quot;Hi guys, \nYour project ${JOB_NAME} has been ${currentBuild.currentResult}. \nCheck console output at ${BUILD_URL} to view the results. \nThanks you. \n--------------------------------------------------- \nPhạm Tiến Minh Đức - DevOps Engineer \nEmail: ducpham@x3english.com \nX3English -  Tầng 1, Tháp B Tòa Nhà The Light, Tố Hữu, Trung Văn, Nam Từ Liêm, Hà Nội 100000 &quot;
+def title_email = &quot;[Jenkins] Jenkins&apos;s report for ${JOB_NAME} - Build # ${BUILD_NUMBER}&quot;
+def receiver = &apos;ducpham@x3english.com&apos;
+node(&apos;master&apos;) {
+            stage(&quot;Pull code from GitLab&quot;){
+                echo &quot;This will be deployed to server Test&quot;
+                git branch: &quot;${Branch}&quot;, credentialsId: &quot;${Project_User}&quot;, url: &quot;${Project_Repository}&quot;
+            }
+            stage(&quot;Prepare for deploying&quot;){              
+            }
+            stage(&quot;Clear old test file&quot;){
+               for (i=0 ; i&lt;IP_Server.size() ; i++){
+                    sh &quot;&quot;&quot;
+                    ssh $Username@${IP_Server[i]} &quot;cd $Web_Folder/$Project_Folder &amp;&amp; rm -rf test/*&quot;
+                    &quot;&quot;&quot;
+                }
+            }    
+            stage(&quot;Push code to staging server&quot;){
+               for (i=0 ; i&lt;IP_Server.size() ; i++){
+                    sh &quot;&quot;&quot;
+                    /usr/bin/rsync -azrv &apos;--exclude=.gitignore&apos; &apos;--exclude=.git&apos; &apos;--exclude=.env&apos; $WORKSPACE/ $Username@${IP_Server[i]}:$Web_Folder/$Project_Folder
+                    &quot;&quot;&quot;
+                }
+            }
+            stage(&quot;Install package&quot;){
+               for (i=0 ; i&lt;IP_Server.size() ; i++){
+                    sh &quot;&quot;&quot;
+                    ssh $Username@${IP_Server[i]} &quot;cd $Web_Folder/$Project_Folder &amp;&amp; yarn&quot;
+                    &quot;&quot;&quot;
+                }
+            }
+            stage(&quot;Run Test&quot;){
+               for (i=0 ; i&lt;IP_Server.size() ; i++){
+                    sh &quot;&quot;&quot;
+                    ssh $Username@${IP_Server[i]} &quot;cd $Web_Folder/$Project_Folder &amp;&amp; npm run test&quot;
+                    &quot;&quot;&quot;
+                }
+            }
+            stage(&quot;PM2 Reload&quot;){
+               for (i=0 ; i&lt;IP_Server.size() ; i++){
+                    sh &quot;&quot;&quot;
+                    ssh $Username@${IP_Server[i]} &quot;pm2 reload $Web_Folder/$Project_Folder/ecosystem.config.js&quot;
+                    &quot;&quot;&quot;
+                }
+            }
+}
+emailext body: &quot;${text_body_email}&quot;, subject: &quot;${title_email}&quot;, to: &quot;${receiver}&quot;
+slackSend(channel: &quot;#general&quot;, message: &quot;${text_body_email}&quot;)</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
