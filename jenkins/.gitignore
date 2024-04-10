@@ -1,2 +1,6 @@
 **/*.log
 **/logs/*
+jenkins_home/war
+jenkins_home/.cache
+jenkins_home/.groovy
+jenkins_home/plugins
