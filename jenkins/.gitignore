@@ -1,10 +1,5 @@
 **/*.log
 **/logs/*
-jenkins_home/war
-jenkins_home/.cache
-jenkins_home/.groovy
-jenkins_home/plugins
-jenkins_home/.java
 
 jenkins_home/queue.xml
 
