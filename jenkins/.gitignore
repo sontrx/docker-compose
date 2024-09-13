@@ -1,6 +1,5 @@
 **/*.log
 **/logs/*
 
-jenkins_home/queue.xml
-jenkins_home/queue.xml.bak
+jenkins_home/
 
