@@ -1,0 +1,19 @@
+# docker compose version
+version: "3.8"
+# all the containers have to declare inside services
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: ${CONTAINER_NAME}
+    hostname: ${RABBIT_HOST}
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - ${RABBIT_PORT}:5672
+      - ${RABBIT_MANAGER_PORT}:15672
+    environment:
+      - "RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}"
+      - "RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}"
+    restart: unless-stopped
+volumes:
+  db_data: {}
