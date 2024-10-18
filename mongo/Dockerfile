@@ -1,6 +1,6 @@
 FROM mongo:latest
 
-LABEL maintainer="sontrx <tranxuanson.com>"
+LABEL maintainer="sontrx <tranxuanson.nuce@gmail.com>"
 
 #COPY mongo.conf /usr/local/etc/mongo/mongo.conf
 
