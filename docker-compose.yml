@@ -161,3 +161,13 @@ services:
       - '9093:9093'
     networks:
       - backend
+  mailhog:
+    container_name: mailhog
+    restart: unless-stopped
+    build: ./mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - frontend
+      - backend
