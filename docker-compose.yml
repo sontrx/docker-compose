@@ -125,6 +125,7 @@ services:
       - backend
   kafka:
     container_name: kafka
+    restart: unless-stopped
     image: 'bitnami/kafka:latest'
     environment:
       - KAFKA_ENABLE_KRAFT=yes
