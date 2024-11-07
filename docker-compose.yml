@@ -78,7 +78,8 @@ services:
     restart: unless-stopped
     build: ./minio
     volumes:
-      - ./minio/data:/export
+      - ./minio/data:/data
+      - ./minio/data-export:/export
       - ./minio/config:/root/.minio
     ports:
       - "${MINIO_PORT}:9000"
