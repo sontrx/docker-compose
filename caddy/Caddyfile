@@ -1,0 +1,24 @@
+{
+	admin 0.0.0.0:2019
+}
+
+localhost {
+    file_server browse
+}
+
+static-site.local {
+    root * /srv/data-site
+    file_server
+}
+
+webapp-3001.local {
+    reverse_proxy "host.docker.internal:3001"
+}
+
+webapp-3002.local {
+    reverse_proxy host.docker.internal:3002
+}
+
+webapp-3003.local {
+    reverse_proxy host.docker.internal:3003
+}

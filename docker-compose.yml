@@ -44,19 +44,19 @@ services:
   postgres:
     container_name: postgres
     restart: unless-stopped
-    build:
-      context: ./postgres
-      args:
-        - POSTGRES_VERSION=${POSTGRES_VERSION}
+    image: postgres:12.2-alpine
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    expose:
+      - "8080"
+      - "5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - "${POSTGRES_PORT}:5432"
+      - "8080:8080"
     networks:
       - backend
   mongo:
@@ -148,13 +148,15 @@ services:
     restart: unless-stopped
     build: ./caddy
     volumes:
-      - ${APP_CODE_PATH_HOST}:/var/www:cached
-      - ${CADDY_CONFIG_PATH}:/etc/caddy
-      - ${CADDY_HOST_LOG_PATH}:/var/log/caddy
-      - ./caddy/data:/root/.caddy
+      - ${APP_CODE_PATH_HOST}:/srv
+      - ./caddy/data-config:/config
+      - ./caddy/data:/data
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
     ports:
       - "${CADDY_HOST_HTTP_PORT}:80"
       - "${CADDY_HOST_HTTPS_PORT}:443"
+      - "2019:2019"
+    command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--watch"]
     networks:
       - frontend
       - backend
