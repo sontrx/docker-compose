@@ -197,3 +197,20 @@ services:
     networks:
       - frontend
       - backend
+  php:
+    container_name: frankenphp
+    restart: unless-stopped
+    build: ./frankenphp
+    volumes:
+      - ../php:/php-app
+      - ./frankenphp/data:/data
+      - ./frankenphp/config:/config
+      - ./frankenphp/Caddyfile:/etc/caddy/Caddyfile
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+      - "443:443/udp" # HTTP/3
+    tty: true
+    networks:
+      - frontend
+      - backend
