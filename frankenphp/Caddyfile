@@ -6,13 +6,13 @@
 }
 
 localhost {
-    root * /php-app
+    root * /php-apps
     file_server browse
 }
 
 static-site.local {
-    root * /php-app
-    file_server
+    root * /php-apps
+    file_server browse
 }
 
 webapp-3001.local {

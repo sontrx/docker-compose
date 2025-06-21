@@ -1,3 +1,7 @@
+# The different stages of this Dockerfile are meant to be built into separate images
+# https://docs.docker.com/develop/develop-images/multistage-build/#stop-at-a-specific-build-stage
+# https://docs.docker.com/compose/compose-file/#target
+
 FROM dunglas/frankenphp:builder AS builder
 
 # Copy xcaddy in the builder image
@@ -19,14 +23,52 @@ RUN CGO_ENABLED=1 \
         --with github.com/dunglas/vulcain/caddy
         # Add extra Caddy modules here
 
-FROM dunglas/frankenphp AS runner
+FROM dunglas/frankenphp AS frankenphp_base
 
 # Replace the official binary by the one contained your custom modules
 COPY --from=builder /usr/local/bin/frankenphp /usr/local/bin/frankenphp
 
-RUN install-php-extensions \
+# persistent / runtime deps
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	acl \
+	file \
+	gettext \
+	git \
+	&& rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    install-php-extensions \
+    @composer \
 	pdo_mysql \
+	apcu \
 	gd \
 	intl \
 	zip \
-	opcache
+	opcache \
+    xdebug \
+;
+
+# Dev FrankenPHP image
+FROM frankenphp_base AS frankenphp_dev
+
+ENV APP_ENV=dev
+ENV XDEBUG_MODE=off
+ENV FRANKENPHP_WORKER_CONFIG=watch
+
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile", "--watch" ]
+
+# Production FrankenPHP image
+FROM frankenphp_base AS frankenphp_prod
+
+ENV APP_ENV=prod
+ENV XDEBUG_MODE=off
+
+# Use production PHP configuration
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+# No dev extensions installed in production
+
+CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile" ]
