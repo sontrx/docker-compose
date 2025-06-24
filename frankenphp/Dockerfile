@@ -61,15 +61,6 @@ RUN set -eux; \
 RUN composer global require laravel/installer;
 ENV PATH="$PATH:/config/composer/vendor/bin"
 
-# Create php-apps directory and set up bash configuration
-RUN echo 'cd /php-apps' >> /root/.bashrc && \
-    echo 'cd /php-apps' >> /etc/bash.bashrc
-
-# Set bash as default shell for root and other users
-RUN chsh -s /bin/bash root && \
-    echo 'export SHELL=/bin/bash' >> /root/.bashrc && \
-    echo 'export SHELL=/bin/bash' >> /etc/bash.bashrc
-
 # Set bash as default shell
 SHELL ["/bin/bash", "-c"]
 
