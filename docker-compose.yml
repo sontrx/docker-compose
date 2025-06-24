@@ -212,11 +212,9 @@ services:
       - ./frankenphp/config:/config
       - ./frankenphp/Caddyfile:/etc/frankenphp/Caddyfile
       - ~/.composer/cache:/root/.composer/cache
-    ports:
-      - "80:80" # HTTP
-      - "443:443" # HTTPS
-      - "443:443/udp" # HTTP/3
+    # ports:
+    #   - "80:80" # HTTP
+    #   - "443:443" # HTTPS
+    #   - "443:443/udp" # HTTP/3
+    network_mode: host
     tty: true
-    networks:
-      - frontend
-      - backend

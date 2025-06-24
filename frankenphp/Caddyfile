@@ -2,12 +2,18 @@
 	admin 0.0.0.0:2019
 
     # Enable FrankenPHP
-	frankenphp
+	frankenphp {
+        num_threads 2
+    }
 }
 
 localhost {
     root * /php-apps
     file_server browse
+}
+
+php-site.local {
+    reverse_proxy http://127.0.0.1:8000
 }
 
 static-site.local {

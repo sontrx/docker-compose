@@ -35,7 +35,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	file \
 	gettext \
 	git \
+	curl \
+	bash \
 	&& rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 22 (LTS) for frontend development
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get update \
+    && apt-get install -y nodejs \
+    && node --version && npm --version
 
 RUN set -eux; \
     install-php-extensions \
@@ -47,9 +55,25 @@ RUN set -eux; \
 	zip \
 	opcache \
     xdebug \
+    pcntl \
 ;
 
-# Dev FrankenPHP image
+RUN composer global require laravel/installer;
+ENV PATH="$PATH:/config/composer/vendor/bin"
+
+# Create php-apps directory and set up bash configuration
+RUN echo 'cd /php-apps' >> /root/.bashrc && \
+    echo 'cd /php-apps' >> /etc/bash.bashrc
+
+# Set bash as default shell for root and other users
+RUN chsh -s /bin/bash root && \
+    echo 'export SHELL=/bin/bash' >> /root/.bashrc && \
+    echo 'export SHELL=/bin/bash' >> /etc/bash.bashrc
+
+# Set bash as default shell
+SHELL ["/bin/bash", "-c"]
+
+# Dev FrankenPHP images
 FROM frankenphp_base AS frankenphp_dev
 
 ENV APP_ENV=dev
