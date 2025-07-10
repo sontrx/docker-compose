@@ -212,9 +212,49 @@ services:
       - ./frankenphp/config:/config
       - ./frankenphp/Caddyfile:/etc/frankenphp/Caddyfile
       - ~/.composer/cache:/root/.composer/cache
-    # ports:
-    #   - "80:80" # HTTP
-    #   - "443:443" # HTTPS
-    #   - "443:443/udp" # HTTP/3
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+      - "443:443/udp" # HTTP/3
     network_mode: host
     tty: true
+  php-fpm:
+    container_name: php-fpm
+    restart: unless-stopped
+    build:
+      context: ./php-fpm
+      target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+        XDEBUG_MODE: develop,coverage,debug,profile
+        XDEBUG_HOST: ${XDEBUG_HOST:-host.docker.internal}
+        XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY:-DOCKER}
+        XDEBUG_LOG: /dev/stdout
+        XDEBUG_LOG_LEVEL: 0
+    user: "${UID:-1000}:${GID:-1000}"
+    volumes:
+      # Mount the applications code for live updates
+      - ~/code/php-apps:/var/www
+    networks:
+      - frontend
+      - backend
+  php-fpm-prod:
+    container_name: php-fpm
+    restart: unless-stopped
+    build:
+      context: ./php-fpm
+      target: production
+    volumes:
+      - ./php-apps:/var/www
+    env_file:
+      - .env
+    networks:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm-healthcheck || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
