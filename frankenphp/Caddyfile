@@ -16,6 +16,14 @@ php-site.local {
     reverse_proxy http://127.0.0.1:8000
 }
 
+example-app.local {
+	root example-app/public/
+	encode zstd br gzip
+	php_server {
+		try_files {path} index.php
+	}
+}
+
 static-site.local {
     root * /php-apps
     file_server browse

@@ -73,6 +73,8 @@ ENV FRANKENPHP_WORKER_CONFIG=watch
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
+WORKDIR /php-apps
+
 CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile", "--watch" ]
 
 # Production FrankenPHP image
@@ -85,5 +87,6 @@ ENV XDEBUG_MODE=off
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # No dev extensions installed in production
+WORKDIR /php-apps
 
 CMD [ "frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile" ]
